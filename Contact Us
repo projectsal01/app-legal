@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Us - Zelli Salon App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      color: #333;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+      padding: 25px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    h1 {
+      text-align: center;
+      color: #007acc;
+      margin-bottom: 20px;
+      animation: fadeInDown 1s ease-in-out;
+    }
+    .tab {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .tab button {
+      padding: 10px 20px;
+      margin: 0 5px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      background: #007acc;
+      color: #fff;
+      font-size: 16px;
+      transition: background 0.3s;
+    }
+    .tab button:hover { background: #005b99; }
+    .tab button.active { background: #005b99; }
+    .content {
+      display: none;
+      animation: fadeIn 1s ease-in-out;
+    }
+    .content.active { display: block; }
+    p {
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+    a {
+      color: #007acc;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: translateY(20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeInDown {
+      0% { opacity: 0; transform: translateY(-30px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Contact Us</h1>
+
+    <div class="tab">
+      <button class="active" onclick="showContent('en')">English</button>
+      <button onclick="showContent('hi')">हिंदी</button>
+    </div>
+
+    <div id="en" class="content active">
+      <p>Email: <a href="mailto:hello.zellisalonapp@gmail.com">hello.zellisalonapp@gmail.com</a></p>
+      <p>Mobile: <a href="tel:+917980030692">+91 7980030692</a></p>
+    </div>
+
+    <div id="hi" class="content">
+      <p>ईमेल: <a href="mailto:hello.zellisalonapp@gmail.com">hello.zellisalonapp@gmail.com</a></p>
+      <p>मोबाइल: <a href="tel:+917980030692">+91 7980030692</a></p>
+    </div>
+  </div>
+
+  <script>
+    function showContent(lang) {
+      document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+      document.getElementById(lang).classList.add('active');
+
+      document.querySelectorAll('.tab button').forEach(b => b.classList.remove('active'));
+      document.querySelector(`.tab button[onclick="showContent('${lang}')"]`).classList.add('active');
+    }
+  </script>
+</body>
+</html>
