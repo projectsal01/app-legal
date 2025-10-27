@@ -1,103 +1,222 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>About Us - Zelli Salon App</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zelli Salon App – Smart Salon Booking Platform</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #f9f9f9;
-      color: #333;
+      font-family: "Poppins", sans-serif;
+      background: #f0f6f7;
       margin: 0;
-      padding: 0;
+      color: #333;
     }
-    .container {
-      max-width: 900px;
-      margin: auto;
-      padding: 25px;
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-      overflow: hidden;
+    header {
+      background: #004d4d;
+      color: white;
+      text-align: center;
+      padding: 25px 10px;
+      border-bottom-left-radius: 40px;
+      border-bottom-right-radius: 40px;
+    }
+    header img {
+      width: 90px;
+      display: block;
+      margin: 0 auto 10px;
     }
     h1 {
-      text-align: center;
-      color: #007acc;
-      margin-bottom: 20px;
-      animation: fadeInDown 1s ease-in-out;
+      margin: 10px 0;
+      font-size: 28px;
+      letter-spacing: 1px;
     }
+
+    .container {
+      max-width: 1000px;
+      margin: 40px auto;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+    }
+
     .tab {
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 25px;
     }
     .tab button {
-      padding: 10px 20px;
-      margin: 0 5px;
+      padding: 10px 25px;
       border: none;
+      background: #007a7a;
+      color: white;
+      margin: 0 5px;
       border-radius: 5px;
       cursor: pointer;
-      background: #007acc;
-      color: #fff;
       font-size: 16px;
-      transition: background 0.3s;
     }
-    .tab button:hover { background: #005b99; }
-    .tab button.active { background: #005b99; }
+    .tab button.active {
+      background: #005b5b;
+    }
+
     .content {
       display: none;
-      animation: fadeIn 1s ease-in-out;
+      animation: fadeIn 0.8s ease-in-out;
     }
-    .content.active { display: block; }
+    .content.active {
+      display: block;
+    }
+
+    .section {
+      margin-bottom: 25px;
+    }
+
+    h2 {
+      color: #007a7a;
+      font-size: 22px;
+      margin-bottom: 10px;
+      border-left: 4px solid #007a7a;
+      padding-left: 8px;
+    }
+
     p {
-      font-size: 16px;
       line-height: 1.6;
       margin-bottom: 12px;
     }
+
     .highlight {
       color: #ff6600;
       font-weight: bold;
+    }
+
+    .qr-section {
+      text-align: center;
+      margin-top: 30px;
+    }
+    .qr-section img {
+      width: 150px;
+      margin: 10px;
+    }
+
+    .socials {
+      text-align: center;
+      margin-top: 30px;
+    }
+    .socials img {
+      width: 40px;
+      margin: 0 10px;
+      vertical-align: middle;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      background: #004d4d;
+      color: white;
+      margin-top: 50px;
+      border-top-left-radius: 30px;
+      border-top-right-radius: 30px;
     }
 
     @keyframes fadeIn {
       0% { opacity: 0; transform: translateY(20px); }
       100% { opacity: 1; transform: translateY(0); }
     }
-
-    @keyframes fadeInDown {
-      0% { opacity: 0; transform: translateY(-30px); }
-      100% { opacity: 1; transform: translateY(0); }
-    }
-
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>About Zelli Salon App</h1>
+  <header>
+    <img src="zelli.png" alt="Zelli Logo" />
+    <h1>Zelli Salon App</h1>
+    <p>Smart Salon Management & Online Booking Platform</p>
+  </header>
 
+  <div class="container">
     <div class="tab">
       <button class="active" onclick="showContent('en')">English</button>
       <button onclick="showContent('hi')">हिंदी</button>
     </div>
 
+    <!-- English Section -->
     <div id="en" class="content active">
-      <p><span class="highlight">For Salon Owners:</span> Zelli Salon App helps you increase revenue by proper slot and time management. Customers no longer wait long, your appointments are optimized, and your salon runs more efficiently.</p>
-      <p><span class="highlight">For Customers:</span> You are now a VIP! No long waiting times, you can book services up to 7 days in advance, and enjoy a smooth, hassle-free experience.</p>
-      <p>Our mission is to create a win-win platform where <span class="highlight">owners earn more</span> and <span class="highlight">customers feel valued</span>.</p>
+      <div class="section">
+        <h2>About Zelli</h2>
+        <p>Zelli is a next-generation <span class="highlight">Salon Booking and Management App</span> that connects salon owners and customers on one smart platform. Our mission is to make beauty and grooming bookings effortless, efficient, and digital.</p>
+      </div>
+
+      <div class="section">
+        <h2>For Salon Owners</h2>
+        <p>✔ Manage your appointments smartly with automated time slots.</p>
+        <p>✔ Eliminate long waiting queues and maximize your daily bookings.</p>
+        <p>✔ Showcase your services, prices, and offers digitally.</p>
+        <p>✔ Use AI-powered features like customer insights and trend analysis (coming soon!).</p>
+      </div>
+
+      <div class="section">
+        <h2>For Customers</h2>
+        <p>💇‍♀️ Book your favorite salon anytime, anywhere — no more waiting!</p>
+        <p>📅 Plan visits up to 7 days in advance with real-time slot availability.</p>
+        <p>⭐ View salon ratings, images, and service details before booking.</p>
+        <p>🤖 Experience upcoming AI tools — like virtual hair try-on, beard/mustache preview, and personalized beauty suggestions.</p>
+      </div>
+
+      <div class="section">
+        <h2>Why Zelli?</h2>
+        <p>Zelli stands for <span class="highlight">Zero Waiting</span> and <span class="highlight">Smart Scheduling</span>. Our goal is to bring the digital booking revolution to every salon in India — helping owners grow and customers save time.</p>
+      </div>
     </div>
 
+    <!-- Hindi Section -->
     <div id="hi" class="content">
-      <p><span class="highlight">सैलून मालिकों के लिए:</span> Zelli Salon App सही स्लॉट और समय प्रबंधन के द्वारा आपकी आय बढ़ाने में मदद करता है। ग्राहक अब लंबे समय तक इंतजार नहीं करते, आपकी अपॉइंटमेंट्स बेहतर तरीके से मैनेज होती हैं और आपका सैलून अधिक कुशलता से चलता है।</p>
-      <p><span class="highlight">ग्राहकों के लिए:</span> अब आप VIP हैं! लंबे समय तक इंतजार नहीं, आप 7 दिनों तक एडवांस बुकिंग कर सकते हैं, और सहज अनुभव का आनंद लें।</p>
-      <p>हमारा मिशन एक ऐसा प्लेटफ़ॉर्म बनाना है जहाँ <span class="highlight">मालिक अधिक कमाएँ</span> और <span class="highlight">ग्राहक मूल्यवान महसूस करें</span>।</p>
+      <div class="section">
+        <h2>ज़ेल्ली के बारे में</h2>
+        <p>ज़ेल्ली एक <span class="highlight">स्मार्ट सैलून बुकिंग और मैनेजमेंट ऐप</span> है जो सैलून मालिकों और ग्राहकों को एक ही प्लेटफ़ॉर्म पर जोड़ता है। हमारा मिशन है कि हर व्यक्ति को सुंदरता और ग्रूमिंग सेवाओं की बुकिंग आसान और डिजिटल तरीके से मिले।</p>
+      </div>
+
+      <div class="section">
+        <h2>सैलून मालिकों के लिए</h2>
+        <p>✔ अपनी अपॉइंटमेंट्स को स्मार्ट तरीके से मैनेज करें।</p>
+        <p>✔ ग्राहकों की लंबी कतारों को खत्म करें और अधिक बुकिंग पाएं।</p>
+        <p>✔ अपनी सेवाएं, कीमतें और ऑफ़र ऑनलाइन दिखाएं।</p>
+        <p>✔ एआई आधारित फीचर्स से ग्राहकों की पसंद और ट्रेंड समझें (जल्द आ रहा है)।</p>
+      </div>
+
+      <div class="section">
+        <h2>ग्राहकों के लिए</h2>
+        <p>💇‍♀️ अपने पसंदीदा सैलून की बुकिंग कभी भी करें – अब इंतजार नहीं!</p>
+        <p>📅 7 दिन पहले तक अपॉइंटमेंट बुक करें और स्लॉट तुरंत देखें।</p>
+        <p>⭐ बुकिंग से पहले सैलून की रेटिंग्स, तस्वीरें और सेवाएं देखें।</p>
+        <p>🤖 आने वाले एआई टूल्स का अनुभव करें – जैसे वर्चुअल हेयर ट्राई-ऑन, दाढ़ी-मूंछ प्रीव्यू और व्यक्तिगत सुझाव।</p>
+      </div>
+
+      <div class="section">
+        <h2>क्यों चुनें ज़ेल्ली?</h2>
+        <p>ज़ेल्ली का मतलब है <span class="highlight">ज़ीरो वेटिंग</span> और <span class="highlight">स्मार्ट शेड्यूलिंग</span>। हमारा उद्देश्य भारत के हर सैलून को डिजिटल बनाना है ताकि मालिकों की कमाई बढ़े और ग्राहकों का समय बचे।</p>
+      </div>
+    </div>
+
+    <div class="qr-section">
+      <h2>Download Now</h2>
+      <img src="zelli_salon_app_direct_qr.png" alt="Zelli App QR Code" />
+      <p>Scan the QR or search <strong>“Zelli Salon”</strong> on Play Store</p>
+    </div>
+
+    <div class="socials">
+      <h2>Follow Us</h2>
+      <!-- Replace # with your actual social links -->
+      <a href="#" target="_blank"><img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" alt="Instagram"></a>
+      <a href="#" target="_blank"><img src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png" alt="YouTube"></a>
+      <a href="#" target="_blank"><img src="https://cdn-icons-png.flaticon.com/512/5968/5968764.png" alt="Facebook"></a>
+      <a href="#" target="_blank"><img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" alt="WhatsApp"></a>
     </div>
   </div>
+
+  <footer>
+    <p>© 2025 Zelli Salon App | Designed with ❤️ by Team Zelli</p>
+  </footer>
 
   <script>
     function showContent(lang) {
       document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
       document.getElementById(lang).classList.add('active');
-
       document.querySelectorAll('.tab button').forEach(b => b.classList.remove('active'));
       document.querySelector(`.tab button[onclick="showContent('${lang}')"]`).classList.add('active');
     }
