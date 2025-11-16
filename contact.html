@@ -20,89 +20,47 @@
       border-bottom-right-radius: 40px;
     }
     header h1 { margin: 10px 0; font-size: 28px; }
+    header p { margin: 0; font-size: 16px; }
+
     .container {
-      max-width: 900px;
+      max-width: 700px;
       margin: 40px auto;
       background: #fff;
       border-radius: 15px;
-      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 3px 15px rgba(0,0,0,0.1);
       padding: 30px;
     }
-    .tab {
-      text-align: center;
-      margin-bottom: 25px;
-    }
-    .tab button {
-      padding: 10px 25px;
-      border: none;
-      background: #007a7a;
-      color: white;
-      margin: 0 5px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 16px;
-      transition: background 0.3s;
-    }
-    .tab button.active, .tab button:hover { background: #005b5b; }
+    h2 { color: #007a7a; margin-bottom: 20px; text-align: center; }
 
-    /* Chat Interface */
-    .chat-container {
-      max-width: 600px;
-      margin: 20px auto;
-      border: 1px solid #ccc;
-      border-radius: 12px;
-      background: #f9f9f9;
+    form {
       display: flex;
       flex-direction: column;
-      height: 400px;
-      overflow: hidden;
     }
-    .chat-messages {
-      flex: 1;
-      padding: 15px;
-      overflow-y: auto;
-    }
-    .message {
-      max-width: 75%;
-      margin-bottom: 12px;
-      padding: 10px 15px;
-      border-radius: 20px;
-      word-wrap: break-word;
-    }
-    .message.user {
-      background: #007a7a;
-      color: white;
-      align-self: flex-end;
-      border-bottom-right-radius: 0;
-    }
-    .message.info {
-      background: #e8f5e8;
-      color: #333;
-      align-self: flex-start;
-      border-bottom-left-radius: 0;
-    }
-    .chat-input {
-      display: flex;
-      border-top: 1px solid #ccc;
-    }
-    .chat-input textarea {
-      flex: 1;
-      padding: 10px;
-      border: none;
-      border-radius: 0;
-      resize: none;
-      font-size: 16px;
-    }
-    .chat-input button {
-      padding: 0 20px;
-      border: none;
-      background: #007a7a;
-      color: white;
-      cursor: pointer;
+    label {
+      margin-bottom: 5px;
       font-weight: bold;
+    }
+    input, textarea {
+      margin-bottom: 20px;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      resize: vertical;
+    }
+    textarea { min-height: 120px; }
+    button {
+      padding: 15px;
+      background: #007a7a;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
       transition: background 0.3s;
     }
-    .chat-input button:hover { background: #005b5b; }
+    button:hover { background: #005b5b; }
 
     footer {
       text-align: center;
@@ -113,57 +71,32 @@
       border-top-left-radius: 30px;
       border-top-right-radius: 30px;
     }
-
-    @keyframes fadeIn {
-      0% { opacity: 0; transform: translateY(20px); }
-      100% { opacity: 1; transform: translateY(0); }
-    }
   </style>
 </head>
 <body>
 
 <header>
   <h1>Contact Zelli Salon App</h1>
-  <p>We're here to help you!</p>
+  <p>We’re here to assist you — send us your query or feedback!</p>
 </header>
 
 <div class="container">
-  <div class="tab">
-    <button class="active" onclick="showContent('en')">English</button>
-    <button onclick="showContent('hi')">हिंदी</button>
-  </div>
+  <h2>Contact Form</h2>
+  <form id="contactForm">
+    <label for="name">Name *</label>
+    <input type="text" id="name" name="name" placeholder="Your name" required>
 
-  <!-- English -->
-  <div id="en" class="content active">
-    <p>Email: <a href="mailto:hello.zellisalonapp@gmail.com">hello.zellisalonapp@gmail.com</a></p>
-    <p>Mobile: <a href="tel:+917980030692">+91 7980030692</a></p>
+    <label for="email">Email *</label>
+    <input type="email" id="email" name="email" placeholder="Your email" required>
 
-    <div class="chat-container">
-      <div id="chatEn" class="chat-messages">
-        <div class="message info">Hi! Type your query below and send. We'll respond soon.</div>
-      </div>
-      <div class="chat-input">
-        <textarea id="inputEn" placeholder="Type your message..."></textarea>
-        <button onclick="sendChat('en')">Send</button>
-      </div>
-    </div>
-  </div>
+    <label for="subject">Subject *</label>
+    <input type="text" id="subject" name="subject" placeholder="Subject" required>
 
-  <!-- Hindi -->
-  <div id="hi" class="content">
-    <p>ईमेल: <a href="mailto:hello.zellisalonapp@gmail.com">hello.zellisalonapp@gmail.com</a></p>
-    <p>मोबाइल: <a href="tel:+917980030692">+91 7980030692</a></p>
+    <label for="message">Message *</label>
+    <textarea id="message" name="message" placeholder="Type your message here..." required></textarea>
 
-    <div class="chat-container">
-      <div id="chatHi" class="chat-messages">
-        <div class="message info">नमस्ते! नीचे अपना प्रश्न टाइप करें और भेजें। हम जल्द ही जवाब देंगे।</div>
-      </div>
-      <div class="chat-input">
-        <textarea id="inputHi" placeholder="अपना संदेश टाइप करें..."></textarea>
-        <button onclick="sendChat('hi')">भेजें</button>
-      </div>
-    </div>
-  </div>
+    <button type="submit">Send Message</button>
+  </form>
 </div>
 
 <footer>
@@ -171,33 +104,28 @@
 </footer>
 
 <script>
-function showContent(lang) {
-  document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
-  document.getElementById(lang).classList.add('active');
-  document.querySelectorAll('.tab button').forEach(b => b.classList.remove('active'));
-  document.querySelector(`.tab button[onclick="showContent('${lang}')"]`).classList.add('active');
-}
+document.getElementById('contactForm').addEventListener('submit', function(e){
+  e.preventDefault();
 
-function sendChat(lang) {
-  const input = lang === 'en' ? document.getElementById('inputEn') : document.getElementById('inputHi');
-  const chat = lang === 'en' ? document.getElementById('chatEn') : document.getElementById('chatHi');
-  const message = input.value.trim();
-  if (!message) return;
+  const name = document.getElementById('name').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const subject = document.getElementById('subject').value.trim();
+  const message = document.getElementById('message').value.trim();
 
-  // Add user message
-  const userMsg = document.createElement('div');
-  userMsg.className = 'message user';
-  userMsg.textContent = message;
-  chat.appendChild(userMsg);
-  chat.scrollTop = chat.scrollHeight;
-
-  // Reset input
-  input.value = '';
+  if(!name || !email || !subject || !message) {
+    alert("Please fill all fields!");
+    return;
+  }
 
   // Open email client
-  const subject = "Zelli App Query / Feedback";
-  window.location.href = `mailto:hello.zellisalonapp@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`;
-}
+  const mailtoLink = `mailto:hello.zellisalonapp@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(
+    `Name: ${name}\nEmail: ${email}\n\n${message}`
+  )}`;
+  window.location.href = mailtoLink;
+
+  // Optional: reset form
+  this.reset();
+});
 </script>
 
 </body>
