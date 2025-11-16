@@ -1,132 +1,738 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Contact Us - Zelli Salon App</title>
-  <style>
-    body {
-      font-family: "Poppins", sans-serif;
-      background: #f0f6f7;
-      margin: 0;
-      color: #333;
-    }
-    header {
-      background: #004d4d;
-      color: white;
-      text-align: center;
-      padding: 25px 10px;
-      border-bottom-left-radius: 40px;
-      border-bottom-right-radius: 40px;
-    }
-    header h1 { margin: 10px 0; font-size: 28px; }
-    header p { margin: 0; font-size: 16px; }
+import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'dart:async';
+import '../../widgets/salon_card.dart';
+import '../../utils/location_helper.dart';
+import '../../services/distance_service.dart';
 
-    .container {
-      max-width: 700px;
-      margin: 40px auto;
-      background: #fff;
-      border-radius: 15px;
-      box-shadow: 0 3px 15px rgba(0,0,0,0.1);
-      padding: 30px;
-    }
-    h2 { color: #007a7a; margin-bottom: 20px; text-align: center; }
+class BrowseSalonsScreen extends StatefulWidget {
+  final String language;
+  const BrowseSalonsScreen({super.key, required this.language});
 
-    form {
-      display: flex;
-      flex-direction: column;
-    }
-    label {
-      margin-bottom: 5px;
-      font-weight: bold;
-    }
-    input, textarea {
-      margin-bottom: 20px;
-      padding: 12px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      font-size: 16px;
-      resize: vertical;
-    }
-    textarea { min-height: 120px; }
-    button {
-      padding: 15px;
-      background: #007a7a;
-      color: white;
-      font-size: 16px;
-      font-weight: bold;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    button:hover { background: #005b5b; }
+  @override
+  State<BrowseSalonsScreen> createState() => _BrowseSalonsPageState();
+}
 
-    footer {
-      text-align: center;
-      padding: 20px;
-      background: #004d4d;
-      color: white;
-      margin-top: 50px;
-      border-top-left-radius: 30px;
-      border-top-right-radius: 30px;
-    }
-  </style>
-</head>
-<body>
+class _BrowseSalonsPageState extends State<BrowseSalonsScreen> {
+  final SupabaseClient _supabase = Supabase.instance.client;
+  final TextEditingController _searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
 
-<header>
-  <h1>Contact Zelli Salon App</h1>
-  <p>We’re here to assist you — send us your query or feedback!</p>
-</header>
+  bool _loading = true;
+  bool _fetchingMore = false;
+  bool _hasMore = true;
+  bool _isDisposed = false;
 
-<div class="container">
-  <h2>Contact Form</h2>
-  <form id="contactForm">
-    <label for="name">Name *</label>
-    <input type="text" id="name" name="name" placeholder="Your name" required>
+  List<Map<String, dynamic>> _salons = [];
+  List<Map<String, dynamic>> _allSalons = [];
+  List<String> _serviceCategories = [];
+  String? _selectedCategory;
 
-    <label for="email">Email *</label>
-    <input type="email" id="email" name="email" placeholder="Your email" required>
+  double? _userLat;
+  double? _userLng;
 
-    <label for="subject">Subject *</label>
-    <input type="text" id="subject" name="subject" placeholder="Subject" required>
+  int _limit = 10;
+  int _offset = 0;
+  String _searchQuery = '';
+  String _selectedSort = 'Nearby';
+  final List<String> _sortOptions = ['Name', 'Rating', 'Popularity', 'Nearby'];
 
-    <label for="message">Message *</label>
-    <textarea id="message" name="message" placeholder="Type your message here..." required></textarea>
+  Timer? _debounce;
 
-    <button type="submit">Send Message</button>
-  </form>
-</div>
+  // Getter for active filters
+  bool get hasActiveFilters => _selectedCategory != null || _searchQuery.isNotEmpty;
 
-<footer>
-  © 2025 Zelli Salon App | Designed with ❤️ by Team Zelli
-</footer>
-
-<script>
-document.getElementById('contactForm').addEventListener('submit', function(e){
-  e.preventDefault();
-
-  const name = document.getElementById('name').value.trim();
-  const email = document.getElementById('email').value.trim();
-  const subject = document.getElementById('subject').value.trim();
-  const message = document.getElementById('message').value.trim();
-
-  if(!name || !email || !subject || !message) {
-    alert("Please fill all fields!");
-    return;
+  @override
+  void initState() {
+    super.initState();
+    _isDisposed = false;
+    _initializeData();
+    _scrollController.addListener(_onScroll);
+    _setupSearchListener();
   }
 
-  // Open email client
-  const mailtoLink = `mailto:hello.zellisalonapp@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(
-    `Name: ${name}\nEmail: ${email}\n\n${message}`
-  )}`;
-  window.location.href = mailtoLink;
+  @override
+  void dispose() {
+    _isDisposed = true;
+    _debounce?.cancel();
+    _searchController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
 
-  // Optional: reset form
-  this.reset();
-});
-</script>
+  void _initializeData() async {
+    try {
+      await _getUserLocation();
+      await _fetchServiceCategories();
+      await _fetchSalons(reset: true);
+    } catch (_) {
+      if (!_isDisposed && mounted) {
+        setState(() => _loading = false);
+      }
+    }
+  }
 
-</body>
-</html>
+  void _setupSearchListener() {
+    _searchController.addListener(() {
+      if (_isDisposed) return;
+      
+      final query = _searchController.text.trim();
+      if (query == _searchQuery) return;
+      
+      _searchQuery = query;
+      
+      _debounce?.cancel();
+      _debounce = Timer(const Duration(milliseconds: 500), () {
+        if (!_isDisposed && mounted) {
+          _filterSalonsLocally(_searchQuery);
+        }
+      });
+    });
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200 &&
+        !_fetchingMore &&
+        _hasMore &&
+        !_isDisposed &&
+        mounted) {
+      _fetchSalons();
+    }
+  }
+
+  Future<void> _getUserLocation() async {
+    try {
+      final position = await LocationHelper.getCurrentLocation();
+      if (position != null && !_isDisposed && mounted) {
+        setState(() {
+          _userLat = position.latitude;
+          _userLng = position.longitude;
+        });
+      }
+    } catch (_) {
+      // Continue without location
+    }
+  }
+
+  Future<void> _fetchServiceCategories() async {
+    try {
+      final response = await _supabase
+          .from('salons')
+          .select('services')
+          .not('services', 'is', null)
+          .timeout(const Duration(seconds: 10));
+
+      final Set<String> categories = <String>{};
+      
+      for (final salon in response) {
+        final services = salon['services'] as List<dynamic>?;
+        if (services != null) {
+          for (final service in services) {
+            final serviceName = service['name']?.toString() ?? '';
+            if (serviceName.isNotEmpty) {
+              final cleanName = serviceName.trim().replaceAll(RegExp(r'\s+'), ' ');
+              categories.add(cleanName);
+            }
+          }
+        }
+      }
+      
+      final sortedCategories = categories.toList()..sort();
+      if (!_isDisposed && mounted) {
+        setState(() => _serviceCategories = sortedCategories);
+      }
+    } catch (_) {
+      if (!_isDisposed && mounted) {
+        setState(() => _serviceCategories = []);
+      }
+    }
+  }
+
+  void _filterSalonsLocally(String query) {
+    if (_isDisposed) return;
+
+    List<Map<String, dynamic>> filtered = List.from(_allSalons);
+    
+    // Apply service category filter
+    if (_selectedCategory != null) {
+      filtered = _filterSalonsByService(filtered, _selectedCategory!);
+    }
+    
+    // Apply search filter
+    if (query.isNotEmpty) {
+      filtered = filtered.where((salon) {
+        final name = (salon['name'] ?? '').toString().toLowerCase();
+        final address = (salon['address'] ?? '').toString().toLowerCase();
+        final services = salon['services'] as List<dynamic>? ?? [];
+        final hasMatchingService = services.any((service) {
+          final serviceName = (service['name'] ?? '').toString().toLowerCase();
+          return serviceName.contains(query.toLowerCase());
+        });
+        
+        return name.contains(query.toLowerCase()) || 
+               address.contains(query.toLowerCase()) ||
+               hasMatchingService;
+      }).toList();
+    }
+
+    // Apply sorting
+    _sortSalons(filtered);
+
+    if (!_isDisposed && mounted) {
+      setState(() {
+        _salons = filtered;
+      });
+    }
+  }
+
+  List<Map<String, dynamic>> _filterSalonsByService(
+    List<Map<String, dynamic>> salons, 
+    String category
+  ) {
+    return salons.where((salon) {
+      final services = salon['services'] as List<dynamic>?;
+      if (services == null) return false;
+      
+      return services.any((service) {
+        final serviceName = service['name']?.toString() ?? '';
+        return serviceName.toLowerCase().contains(category.toLowerCase());
+      });
+    }).toList();
+  }
+
+  Future<void> _fetchSalons({bool reset = false}) async {
+    if (_isDisposed) return;
+    
+    if (reset) {
+      _offset = 0;
+      _hasMore = true;
+      if (!_isDisposed && mounted) {
+        setState(() {
+          _salons.clear();
+          _allSalons.clear();
+          _loading = true;
+        });
+      }
+    } else {
+      if (!_hasMore || _fetchingMore) return;
+      if (!_isDisposed && mounted) {
+        setState(() => _fetchingMore = true);
+      }
+    }
+
+    try {
+      var query = _supabase.from('salons').select();
+      
+      // Apply search filter to API for initial load with search
+      if (_searchQuery.isNotEmpty && reset) {
+        query = query.or(
+          'name.ilike.%$_searchQuery%,services.cs.[{"name": "$_searchQuery"}]',
+        );
+      }
+
+      final response = await query
+          .range(_offset, _offset + _limit - 1)
+          .timeout(const Duration(seconds: 15));
+
+      final List<Map<String, dynamic>> newSalons = 
+          (response as List<dynamic>? ?? [])
+              .map((e) => Map<String, dynamic>.from(e as Map))
+              .toList();
+
+      // Client-side filtering for services
+      final List<Map<String, dynamic>> filteredSalons = _selectedCategory != null
+          ? _filterSalonsByService(newSalons, _selectedCategory!)
+          : newSalons;
+
+      // Enhance salon data with distance
+      final enhancedSalons = await _enhanceSalonData(filteredSalons);
+
+      if (_isDisposed) return;
+
+      // Update allSalons - remove duplicates for pagination
+      if (reset) {
+        _allSalons = List.from(enhancedSalons);
+      } else {
+        final newSalonIds = enhancedSalons.map((s) => s['id']).toSet();
+        _allSalons.removeWhere((s) => newSalonIds.contains(s['id']));
+        _allSalons.addAll(enhancedSalons);
+      }
+
+      // Apply current filters to all loaded data
+      _filterSalonsLocally(_searchQuery);
+
+      _offset += newSalons.length;
+      _hasMore = newSalons.length == _limit;
+
+    } catch (_) {
+      // Silent fail for network errors
+    } finally {
+      if (!_isDisposed && mounted) {
+        setState(() {
+          _loading = false;
+          _fetchingMore = false;
+        });
+      }
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> _enhanceSalonData(
+    List<Map<String, dynamic>> salons
+  ) async {
+    if (_userLat != null && _userLng != null) {
+      for (final salon in salons) {
+        final lat = salon['latitude'] as double?;
+        final lng = salon['longitude'] as double?;
+        if (lat != null && lng != null) {
+          salon['distance_meters'] = DistanceService.calculateDistance(
+            _userLat!, _userLng!, lat, lng
+          );
+        } else {
+          salon['distance_meters'] = double.infinity;
+        }
+      }
+    }
+    return salons;
+  }
+
+  void _sortSalons(List<Map<String, dynamic>> salons) {
+    switch (_selectedSort) {
+      case 'Name':
+        salons.sort((a, b) =>
+            (a['name'] ?? '').toString().compareTo((b['name'] ?? '').toString()));
+        break;
+      case 'Rating':
+        salons.sort((a, b) => _getAverageRating(b).compareTo(_getAverageRating(a)));
+        break;
+      case 'Popularity':
+        salons.sort((a, b) =>
+            ((b['review_count'] as num?)?.toInt() ?? 0)
+                .compareTo((a['review_count'] as num?)?.toInt() ?? 0));
+        break;
+      case 'Nearby':
+        salons.sort((a, b) =>
+            ((a['distance_meters'] as double?) ?? double.infinity)
+                .compareTo((b['distance_meters'] as double?) ?? double.infinity));
+        break;
+    }
+  }
+
+  double _getAverageRating(Map<String, dynamic> salon) {
+    return (salon['avg_rating'] as num?)?.toDouble() ?? 0.0;
+  }
+
+  Future<void> _handleRefresh() async => _fetchSalons(reset: true);
+
+  void _clearAllFilters() {
+    if (_isDisposed) return;
+    
+    _searchController.clear();
+    setState(() {
+      _selectedCategory = null;
+      _selectedSort = 'Nearby';
+      _searchQuery = '';
+    });
+    _filterSalonsLocally('');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8F9FA),
+      appBar: AppBar(
+        title: Text(
+          widget.language == 'en' ? 'Browse Salons' : 'सैलून देखें',
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+            color: Colors.black,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 0,
+        foregroundColor: Colors.black,
+        actions: [
+          if (hasActiveFilters)
+            IconButton(
+              onPressed: _clearAllFilters,
+              icon: const Icon(Icons.filter_alt_off, color: Colors.blue),
+              tooltip: widget.language == 'en' ? 'Clear filters' : 'फ़िल्टर साफ़ करें',
+            ),
+        ],
+      ),
+      body: SafeArea(
+        child: RefreshIndicator(
+          onRefresh: _handleRefresh,
+          color: const Color(0xFF1A237E),
+          backgroundColor: Colors.white,
+          child: CustomScrollView(
+            controller: _scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              // Premium Search Bar
+              SliverToBoxAdapter(
+                child: Container(
+                  margin: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: widget.language == 'en'
+                          ? 'Search salons, services...'
+                          : 'सैलून, सेवाएं खोजें...',
+                      hintStyle: TextStyle(color: Colors.grey[600]),
+                      prefixIcon: const Icon(Icons.search, color: Color(0xFF1A237E)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide.none,
+                      ),
+                      filled: true,
+                      fillColor: Colors.white,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                  ),
+                ),
+              ),
+
+              // Search results count with premium styling
+              if (_searchQuery.isNotEmpty)
+                SliverToBoxAdapter(
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.blue[50],
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.blue[100]!),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.search, size: 16, color: Colors.blue[600]),
+                        const SizedBox(width: 8),
+                        Text(
+                          widget.language == 'en'
+                              ? 'Found ${_salons.length} results for "$_searchQuery"'
+                              : '"$_searchQuery" के लिए ${_salons.length} परिणाम मिले',
+                          style: TextStyle(
+                            color: Colors.blue[800],
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+              // Premium Filters Section
+              SliverToBoxAdapter(
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 15,
+                        offset: const Offset(0, 5),
+                      ),
+                    ],
+                    border: Border.all(color: Colors.grey[100]!),
+                  ),
+                  child: Column(
+                    children: [
+                      // Category and Sort in a row
+                      Row(
+                        children: [
+                          // Category filter
+                          if (_serviceCategories.isNotEmpty) ...[
+                            Expanded(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: Colors.grey[300]!),
+                                ),
+                                child: DropdownButtonHideUnderline(
+                                  child: DropdownButton<String?>(
+                                    isExpanded: true,
+                                    value: _selectedCategory,
+                                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                                    icon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
+                                    hint: Text(
+                                      widget.language == 'en' ? 'All Services' : 'सभी सेवाएं',
+                                      style: TextStyle(color: Colors.grey[600]),
+                                    ),
+                                    items: [
+                                      ..._serviceCategories.map((category) =>
+                                        DropdownMenuItem<String?>(
+                                          value: category,
+                                          child: Text(
+                                            category.length > 20 
+                                                ? '${category.substring(0, 20)}...' 
+                                                : category,
+                                            style: const TextStyle(fontSize: 14),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                    onChanged: (value) {
+                                      if (!_isDisposed && mounted) {
+                                        setState(() {
+                                          _selectedCategory = value;
+                                        });
+                                        _filterSalonsLocally(_searchQuery);
+                                      }
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                          ],
+
+                          // Sort dropdown
+                          Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: Colors.grey[300]!),
+                              ),
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButton<String>(
+                                  isExpanded: true,
+                                  value: _selectedSort,
+                                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                                  icon: const Icon(Icons.sort, color: Colors.grey),
+                                  items: _sortOptions
+                                      .map((sort) => DropdownMenuItem(
+                                            value: sort,
+                                            child: Text(
+                                              sort,
+                                              style: const TextStyle(fontSize: 14),
+                                            ),
+                                          ))
+                                      .toList(),
+                                  onChanged: (value) {
+                                    if (value != null && !_isDisposed && mounted) {
+                                      setState(() {
+                                        _selectedSort = value;
+                                      });
+                                      _filterSalonsLocally(_searchQuery);
+                                    }
+                                  },
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      // Active filters chips
+                      if (hasActiveFilters) ...[
+                        const SizedBox(height: 12),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            if (_selectedCategory != null)
+                              _buildFilterChip(
+                                _selectedCategory!,
+                                onRemove: () {
+                                  setState(() => _selectedCategory = null);
+                                  _filterSalonsLocally(_searchQuery);
+                                },
+                              ),
+                            if (_searchQuery.isNotEmpty)
+                              _buildFilterChip(
+                                '"$_searchQuery"',
+                                onRemove: () {
+                                  _searchController.clear();
+                                  _filterSalonsLocally('');
+                                },
+                              ),
+                          ],
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+
+              // Content Grid
+              _buildContent(width),
+
+              // Premium Loading more indicator
+              if (_fetchingMore)
+                SliverToBoxAdapter(
+                  child: Container(
+                    margin: const EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(16),
+                    child: const Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF1A237E)),
+                      ),
+                    ),
+                  ),
+                ),
+
+              // Extra space for better scrolling
+              const SliverToBoxAdapter(
+                child: SizedBox(height: 20),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilterChip(String label, {required VoidCallback onRemove}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.blue[50],
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.blue[200]!),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.blue[800],
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(width: 4),
+          GestureDetector(
+            onTap: onRemove,
+            child: Icon(Icons.close, size: 14, color: Colors.blue[600]),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContent(double width) {
+    if (_loading && _salons.isEmpty) {
+      return SliverFillRemaining(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF1A237E)),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                widget.language == 'en' ? 'Loading salons...' : 'सैलून लोड हो रहे हैं...',
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 16,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (_salons.isEmpty) {
+      return SliverFillRemaining(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(40),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.search_off,
+                  size: 80,
+                  color: Colors.grey.shade400,
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  _searchQuery.isEmpty && _selectedCategory == null
+                      ? (widget.language == 'en' ? 'No salons found' : 'कोई सैलून नहीं मिला')
+                      : (widget.language == 'en' ? 'No results found' : 'कोई परिणाम नहीं मिला'),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  widget.language == 'en'
+                      ? 'Try different search terms or filters'
+                      : 'विभिन्न खोज शब्द या फ़िल्टर आज़माएं',
+                  style: TextStyle(
+                    color: Colors.grey.shade600,
+                    fontSize: 14,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                if (hasActiveFilters) ...[
+                  const SizedBox(height: 20),
+                  ElevatedButton.icon(
+                    onPressed: _clearAllFilters,
+                    icon: const Icon(Icons.filter_alt_off, size: 18),
+                    label: Text(widget.language == 'en' ? 'Clear Filters' : 'फ़िल्टर साफ़ करें'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    return SliverPadding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      sliver: SliverGrid(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          mainAxisSpacing: 16,
+          crossAxisSpacing: 16,
+          childAspectRatio: 0.75,
+        ),
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            final salon = _salons[index];
+            return SalonCard(
+              salon: salon,
+              width: width,
+              language: widget.language,
+              userLat: _userLat,
+              userLng: _userLng,
+            );
+          },
+          childCount: _salons.length,
+        ),
+      ),
+    );
+  }
+}
