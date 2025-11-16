@@ -19,10 +19,7 @@
       border-bottom-left-radius: 40px;
       border-bottom-right-radius: 40px;
     }
-    header h1 {
-      margin: 10px 0;
-      font-size: 28px;
-    }
+    header h1 { margin: 10px 0; font-size: 28px; }
     .container {
       max-width: 900px;
       margin: 40px auto;
@@ -46,26 +43,67 @@
       font-size: 16px;
       transition: background 0.3s;
     }
-    .tab button.active, .tab button:hover {
-      background: #005b5b;
+    .tab button.active, .tab button:hover { background: #005b5b; }
+
+    /* Chat Interface */
+    .chat-container {
+      max-width: 600px;
+      margin: 20px auto;
+      border: 1px solid #ccc;
+      border-radius: 12px;
+      background: #f9f9f9;
+      display: flex;
+      flex-direction: column;
+      height: 400px;
+      overflow: hidden;
     }
-    .content {
-      display: none;
-      animation: fadeIn 0.8s ease-in-out;
-      text-align: center;
+    .chat-messages {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
     }
-    .content.active { display: block; }
-    p {
-      font-size: 16px;
-      line-height: 1.6;
+    .message {
+      max-width: 75%;
       margin-bottom: 12px;
+      padding: 10px 15px;
+      border-radius: 20px;
+      word-wrap: break-word;
     }
-    a {
-      color: #007a7a;
-      text-decoration: none;
+    .message.user {
+      background: #007a7a;
+      color: white;
+      align-self: flex-end;
+      border-bottom-right-radius: 0;
+    }
+    .message.info {
+      background: #e8f5e8;
+      color: #333;
+      align-self: flex-start;
+      border-bottom-left-radius: 0;
+    }
+    .chat-input {
+      display: flex;
+      border-top: 1px solid #ccc;
+    }
+    .chat-input textarea {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 0;
+      resize: none;
+      font-size: 16px;
+    }
+    .chat-input button {
+      padding: 0 20px;
+      border: none;
+      background: #007a7a;
+      color: white;
+      cursor: pointer;
       font-weight: bold;
+      transition: background 0.3s;
     }
-    a:hover { text-decoration: underline; }
+    .chat-input button:hover { background: #005b5b; }
+
     footer {
       text-align: center;
       padding: 20px;
@@ -75,6 +113,7 @@
       border-top-left-radius: 30px;
       border-top-right-radius: 30px;
     }
+
     @keyframes fadeIn {
       0% { opacity: 0; transform: translateY(20px); }
       100% { opacity: 1; transform: translateY(0); }
@@ -94,16 +133,36 @@
     <button onclick="showContent('hi')">हिंदी</button>
   </div>
 
+  <!-- English -->
   <div id="en" class="content active">
     <p>Email: <a href="mailto:hello.zellisalonapp@gmail.com">hello.zellisalonapp@gmail.com</a></p>
     <p>Mobile: <a href="tel:+917980030692">+91 7980030692</a></p>
-    <p>We usually respond within 1–2 business days.</p>
+
+    <div class="chat-container">
+      <div id="chatEn" class="chat-messages">
+        <div class="message info">Hi! Type your query below and send. We'll respond soon.</div>
+      </div>
+      <div class="chat-input">
+        <textarea id="inputEn" placeholder="Type your message..."></textarea>
+        <button onclick="sendChat('en')">Send</button>
+      </div>
+    </div>
   </div>
 
+  <!-- Hindi -->
   <div id="hi" class="content">
     <p>ईमेल: <a href="mailto:hello.zellisalonapp@gmail.com">hello.zellisalonapp@gmail.com</a></p>
     <p>मोबाइल: <a href="tel:+917980030692">+91 7980030692</a></p>
-    <p>हम आम तौर पर 1–2 कार्य दिवसों के भीतर जवाब देते हैं।</p>
+
+    <div class="chat-container">
+      <div id="chatHi" class="chat-messages">
+        <div class="message info">नमस्ते! नीचे अपना प्रश्न टाइप करें और भेजें। हम जल्द ही जवाब देंगे।</div>
+      </div>
+      <div class="chat-input">
+        <textarea id="inputHi" placeholder="अपना संदेश टाइप करें..."></textarea>
+        <button onclick="sendChat('hi')">भेजें</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -112,12 +171,33 @@
 </footer>
 
 <script>
-  function showContent(lang) {
-    document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
-    document.getElementById(lang).classList.add('active');
-    document.querySelectorAll('.tab button').forEach(b => b.classList.remove('active'));
-    document.querySelector(`.tab button[onclick="showContent('${lang}')"]`).classList.add('active');
-  }
+function showContent(lang) {
+  document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+  document.getElementById(lang).classList.add('active');
+  document.querySelectorAll('.tab button').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.tab button[onclick="showContent('${lang}')"]`).classList.add('active');
+}
+
+function sendChat(lang) {
+  const input = lang === 'en' ? document.getElementById('inputEn') : document.getElementById('inputHi');
+  const chat = lang === 'en' ? document.getElementById('chatEn') : document.getElementById('chatHi');
+  const message = input.value.trim();
+  if (!message) return;
+
+  // Add user message
+  const userMsg = document.createElement('div');
+  userMsg.className = 'message user';
+  userMsg.textContent = message;
+  chat.appendChild(userMsg);
+  chat.scrollTop = chat.scrollHeight;
+
+  // Reset input
+  input.value = '';
+
+  // Open email client
+  const subject = "Zelli App Query / Feedback";
+  window.location.href = `mailto:hello.zellisalonapp@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`;
+}
 </script>
 
 </body>
