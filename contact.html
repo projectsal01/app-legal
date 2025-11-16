@@ -6,47 +6,53 @@
   <title>Contact Us - Zelli Salon App</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #f9f9f9;
-      color: #333;
+      font-family: "Poppins", sans-serif;
+      background: #f0f6f7;
       margin: 0;
-      padding: 0;
+      color: #333;
+    }
+    header {
+      background: #004d4d;
+      color: white;
+      text-align: center;
+      padding: 25px 10px;
+      border-bottom-left-radius: 40px;
+      border-bottom-right-radius: 40px;
+    }
+    header h1 {
+      margin: 10px 0;
+      font-size: 28px;
     }
     .container {
       max-width: 900px;
-      margin: auto;
-      padding: 25px;
+      margin: 40px auto;
       background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-      overflow: hidden;
-    }
-    h1 {
-      text-align: center;
-      color: #007acc;
-      margin-bottom: 20px;
-      animation: fadeInDown 1s ease-in-out;
+      border-radius: 15px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+      padding: 30px;
     }
     .tab {
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 25px;
     }
     .tab button {
-      padding: 10px 20px;
-      margin: 0 5px;
+      padding: 10px 25px;
       border: none;
+      background: #007a7a;
+      color: white;
+      margin: 0 5px;
       border-radius: 5px;
       cursor: pointer;
-      background: #007acc;
-      color: #fff;
       font-size: 16px;
       transition: background 0.3s;
     }
-    .tab button:hover { background: #005b99; }
-    .tab button.active { background: #005b99; }
+    .tab button.active, .tab button:hover {
+      background: #005b5b;
+    }
     .content {
       display: none;
-      animation: fadeIn 1s ease-in-out;
+      animation: fadeIn 0.8s ease-in-out;
+      text-align: center;
     }
     .content.active { display: block; }
     p {
@@ -55,50 +61,64 @@
       margin-bottom: 12px;
     }
     a {
-      color: #007acc;
+      color: #007a7a;
       text-decoration: none;
+      font-weight: bold;
     }
-    a:hover {
-      text-decoration: underline;
+    a:hover { text-decoration: underline; }
+    footer {
+      text-align: center;
+      padding: 20px;
+      background: #004d4d;
+      color: white;
+      margin-top: 50px;
+      border-top-left-radius: 30px;
+      border-top-right-radius: 30px;
     }
     @keyframes fadeIn {
       0% { opacity: 0; transform: translateY(20px); }
       100% { opacity: 1; transform: translateY(0); }
     }
-    @keyframes fadeInDown {
-      0% { opacity: 0; transform: translateY(-30px); }
-      100% { opacity: 1; transform: translateY(0); }
-    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Contact Us</h1>
 
-    <div class="tab">
-      <button class="active" onclick="showContent('en')">English</button>
-      <button onclick="showContent('hi')">हिंदी</button>
-    </div>
+<header>
+  <h1>Contact Zelli Salon App</h1>
+  <p>We're here to help you!</p>
+</header>
 
-    <div id="en" class="content active">
-      <p>Email: <a href="mailto:hello.zellisalonapp@gmail.com">hello.zellisalonapp@gmail.com</a></p>
-      <p>Mobile: <a href="tel:+917980030692">+91 7980030692</a></p>
-    </div>
-
-    <div id="hi" class="content">
-      <p>ईमेल: <a href="mailto:hello.zellisalonapp@gmail.com">hello.zellisalonapp@gmail.com</a></p>
-      <p>मोबाइल: <a href="tel:+917980030692">+91 7980030692</a></p>
-    </div>
+<div class="container">
+  <div class="tab">
+    <button class="active" onclick="showContent('en')">English</button>
+    <button onclick="showContent('hi')">हिंदी</button>
   </div>
 
-  <script>
-    function showContent(lang) {
-      document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
-      document.getElementById(lang).classList.add('active');
+  <div id="en" class="content active">
+    <p>Email: <a href="mailto:hello.zellisalonapp@gmail.com">hello.zellisalonapp@gmail.com</a></p>
+    <p>Mobile: <a href="tel:+917980030692">+91 7980030692</a></p>
+    <p>We usually respond within 1–2 business days.</p>
+  </div>
 
-      document.querySelectorAll('.tab button').forEach(b => b.classList.remove('active'));
-      document.querySelector(`.tab button[onclick="showContent('${lang}')"]`).classList.add('active');
-    }
-  </script>
+  <div id="hi" class="content">
+    <p>ईमेल: <a href="mailto:hello.zellisalonapp@gmail.com">hello.zellisalonapp@gmail.com</a></p>
+    <p>मोबाइल: <a href="tel:+917980030692">+91 7980030692</a></p>
+    <p>हम आम तौर पर 1–2 कार्य दिवसों के भीतर जवाब देते हैं।</p>
+  </div>
+</div>
+
+<footer>
+  © 2025 Zelli Salon App | Designed with ❤️ by Team Zelli
+</footer>
+
+<script>
+  function showContent(lang) {
+    document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+    document.getElementById(lang).classList.add('active');
+    document.querySelectorAll('.tab button').forEach(b => b.classList.remove('active'));
+    document.querySelector(`.tab button[onclick="showContent('${lang}')"]`).classList.add('active');
+  }
+</script>
+
 </body>
 </html>
