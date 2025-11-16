@@ -6,75 +6,65 @@
   <title>Contact Us - Zelli Salon App</title>
   <style>
     body {
-      font-family: "Poppins", sans-serif;
-      background: #f0f6f7;
+      font-family: Arial, sans-serif;
+      background-color: #f0f6f7;
       margin: 0;
-      color: #333;
+      padding: 0;
       display: flex;
       flex-direction: column;
       min-height: 100vh;
+      color: #333;
     }
 
     header {
-      background: #004d4d;
+      background-color: #004d4d;
       color: white;
       text-align: center;
       padding: 30px 10px;
-      border-bottom-left-radius: 40px;
-      border-bottom-right-radius: 40px;
     }
-    header h1 { margin: 0; font-size: 28px; }
-    header p { margin: 8px 0 0 0; font-size: 16px; }
+
+    header h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    header p {
+      margin: 5px 0 0 0;
+      font-size: 16px;
+    }
 
     .container {
       flex: 1;
-      max-width: 500px;
-      margin: 40px auto 20px;
-      background: #fff;
-      border-radius: 20px;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+      max-width: 400px;
+      margin: 40px auto;
+      background-color: #fff;
+      border-radius: 15px;
       padding: 30px;
       text-align: center;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
     }
 
-    h2 { color: #007a7a; margin-bottom: 25px; }
-
-    .contact-btn {
+    a.button {
       display: block;
-      width: 100%;
-      padding: 18px;
-      margin: 15px 0;
-      font-size: 18px;
-      font-weight: bold;
+      margin: 20px 0;
+      padding: 15px;
+      background-color: #007a7a;
       color: white;
-      background: #007a7a;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
       text-decoration: none;
+      font-weight: bold;
+      border-radius: 10px;
       transition: background 0.3s;
     }
-    .contact-btn:hover { background: #005b5b; }
 
-    .info-text {
-      font-size: 14px;
-      color: #555;
-      margin-top: 15px;
+    a.button:hover {
+      background-color: #005b5b;
     }
 
     footer {
       text-align: center;
       padding: 20px;
-      background: #004d4d;
+      background-color: #004d4d;
       color: white;
-      border-top-left-radius: 30px;
-      border-top-right-radius: 30px;
-    }
-
-    @media (max-width: 400px) {
-      header h1 { font-size: 24px; }
-      header p { font-size: 14px; }
-      .contact-btn { font-size: 16px; padding: 15px; }
     }
   </style>
 </head>
@@ -82,21 +72,13 @@
 
 <header>
   <h1>Contact Zelli Salon App</h1>
-  <p>We’re here to assist you!</p>
+  <p>We’re here to help you!</p>
 </header>
 
 <div class="container">
-  <h2>Get in Touch</h2>
-  
-  <a class="contact-btn" href="mailto:hello.zellisalonapp@gmail.com">
-    📧 Email Us
-  </a>
-  
-  <a class="contact-btn" href="tel:+917980030692">
-    📞 Call Us
-  </a>
-
-  <p class="info-text">We usually respond within 1–2 business days.</p>
+  <a class="button" href="mailto:hello.zellisalonapp@gmail.com">📧 Email Us</a>
+  <a class="button" href="tel:+917980030692">📞 Call Us</a>
+  <p>We usually respond within 1–2 business days.</p>
 </div>
 
 <footer>
